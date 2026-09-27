@@ -31,7 +31,7 @@ def _token() -> str | None:
     return os.getenv("RAILSIGHT_USAGE_TOKEN")
 
 
-def _api(token: str) -> HfApi:
+def _api(token: str | None) -> HfApi:
     return HfApi(token=token)
 
 
@@ -60,11 +60,9 @@ def _read_at_revision(api: HfApi, token: str, revision: str) -> dict:
 
 
 def read_count(*, cache_seconds: int = 300) -> int | None:
-    """Return the persisted total, or None if the public counter is not configured."""
+    """Read the public total; writing still requires the Space's fine-grained token."""
     global _cached_count, _cached_at
     token = _token()
-    if not token:
-        return None
     with _lock:
         if _cached_count is not None and time.monotonic() - _cached_at < cache_seconds:
             return _cached_count

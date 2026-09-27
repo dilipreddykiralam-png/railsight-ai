@@ -10,7 +10,7 @@ The hosted model and software differ from local Ollama runs. Record the deployme
 
 The README badge and hosted app display a shared count of **successful, complete VLM analyses**. One image counts once; one video counts once if all sampled frames finish. Failed or partial analyses and demo-mode examples are excluded. This is a count of completed runs, not page views, unique people, or active users.
 
-The small public Dataset repository `dilipbobby/railsight-ai-usage` stores only the total, a badge label, and short-lived hashes of random report IDs to avoid duplicate increments. It stores no image/video, model response, filename, reviewer detail, IP address, or account identity. The public JSON is intentionally visible so GitHub can display the badge. The app needs a fine-grained Hugging Face write token restricted to this one Dataset repository, stored as the Space secret `RAILSIGHT_USAGE_TOKEN`; never put the token in Git. Set the optional non-sensitive Space variable `RAILSIGHT_USAGE_REPO` only if the counter repo name changes.
+The small public Dataset repository `dilipbobby/railsight-ai-usage` stores only the total, a badge label, and short-lived hashes of random report IDs to avoid duplicate increments. It stores no image/video, model response, filename, reviewer detail, IP address, or account identity. The public JSON is intentionally visible so GitHub can display the badge. The app can read the public total without a token; to increment it, add a fine-grained Hugging Face write token restricted to this one Dataset repository as the Space secret `RAILSIGHT_USAGE_TOKEN`. Never put the token in Git. Set the optional non-sensitive Space variable `RAILSIGHT_USAGE_REPO` only if the counter repo name changes.
 
 To connect or repair the count:
 
