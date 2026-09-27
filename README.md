@@ -4,11 +4,11 @@
 
 Analyze railway images and videos. Review damage. Verify with human expertise.
 
-[![Tests](https://github.com/dilipreddykiralam-png/railway-incident-review/actions/workflows/tests.yml/badge.svg)](https://github.com/dilipreddykiralam-png/railway-incident-review/actions/workflows/tests.yml)
+[![Tests](https://github.com/dilipreddykiralam-png/railsight-ai/actions/workflows/tests.yml/badge.svg)](https://github.com/dilipreddykiralam-png/railsight-ai/actions/workflows/tests.yml) [![Completed analyses](https://img.shields.io/endpoint?url=https%3A%2F%2Fhuggingface.co%2Fdatasets%2Fdilipbobby%2Frailsight-ai-usage%2Fresolve%2Fmain%2Fusage.json)](https://huggingface.co/datasets/dilipbobby/railsight-ai-usage)
 
-**[Try RailSight AI — live image/video analysis](https://huggingface.co/spaces/dilipbobby/railsight-ai)** · [Saved-example showcase](https://dilipreddykiralam-png.github.io/railway-incident-review/)
+**[Try RailSight AI — live image/video analysis](https://huggingface.co/spaces/dilipbobby/railsight-ai)** · [Saved-example showcase](https://dilipreddykiralam-png.github.io/railsight-ai/)
 
-The live app runs Qwen2.5-VL 7B on Hugging Face ZeroGPU. Free queues and daily GPU limits apply. **Usage totals are displayed inside the app and reset when the Space restarts; an all-time README counter is not connected.** Hosted inference uses Transformers BF16, so record it separately from local Ollama evaluations. [Hosting and maintenance](docs/HOSTING.md).
+The live app runs Qwen2.5-VL 7B on Hugging Face ZeroGPU. Free queues and daily GPU limits apply. The badge counts successful complete image/video analyses from the hosted app; it does not count page visits or claim a number of unique people. The counter begins after it is enabled on the Space. Hosted inference uses Transformers BF16, so record it separately from local Ollama evaluations. See [hosting and maintenance](docs/HOSTING.md).
 
 A local application that turns railway images and sampled video frames into structured incident and damage findings, with supporting images and human verification.
 
@@ -20,7 +20,7 @@ Built with **Qwen2.5-VL 7B**, Ollama, Streamlit, Pydantic and OpenCV. The projec
 
 Reviewing incident media involves identifying the relevant assets, describing visible damage and turning observations into a consistent report. This application drafts that report and keeps the evidence close to each finding. A reviewer can add a missed asset, remove an unsupported claim or correct the component and severity without losing the original model response.
 
-It is a portfolio and research prototype for assisted visual review. It has not been validated for operational railway safety decisions.
+It is a research prototype for assisted visual review. It has not been validated for operational railway safety decisions.
 
 ## What it does
 
@@ -45,7 +45,7 @@ Example input: photo by Paula R. Lively, [CC BY 2.0](https://creativecommons.org
 
 The application supports assets such as locomotives, wagons, passenger coaches, track, signals, catenary, crossing barriers and road vehicles. Each can have a separate damage finding. The sample outputs are actual example runs, not an independently measured accuracy benchmark.
 
-**Software validation: 120 automated tests passed.** These test validation, video presentation, correction handling, dataset export and scoring behavior. This is a software reliability result, **not recognition accuracy**. See the [saved test result](docs/software-test-results.json) and [evaluation scope and instructions](docs/EVALUATION.md).
+Automated checks cover validation, video presentation, human corrections, dataset export and scoring behavior. They test software behavior, **not recognition accuracy**. See the current [Tests workflow](https://github.com/dilipreddykiralam-png/railsight-ai/actions/workflows/tests.yml) and the [evaluation instructions](docs/EVALUATION.md).
 
 ## General system requirements
 
@@ -87,8 +87,8 @@ If the address is already in use, the service may already be running; do not sta
 Use Python 3.11 for a new environment. In a terminal:
 
 ```bash
-git clone https://github.com/dilipreddykiralam-png/railway-incident-review.git
-cd railway-incident-review
+git clone https://github.com/dilipreddykiralam-png/railsight-ai.git
+cd railsight-ai
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -167,7 +167,7 @@ Run the automated software tests without downloading a model:
 python -m pytest -q
 ```
 
-A passing run prints a summary such as `120 passed in ...s`. The exact latest CI result is available through the Tests badge above. Tests exercise schema consistency, failed responses, video grouping, human corrections, evaluation scoring and counter behavior using controlled inputs; they do not prove the model identified damage correctly.
+A passing run prints the number of checks passed. The current CI result is available through the Tests badge above. These checks use controlled inputs; they do not prove that the model identified damage correctly.
 
 For an actual recognition study, label images independently before viewing model responses, freeze the test set and compare the original saved predictions against those labels. [EVALUATION.md](docs/EVALUATION.md) includes exact labelling, batch inference and scoring steps. Never use a successful software test count as an image accuracy percentage.
 
@@ -180,11 +180,11 @@ railreview/            Inference, validation, video handling and evaluation
 prompts/               Versioned prompts and output schemas
 examples/              Attributed sample images and saved outputs
 tests/                 Automated software checks
-docs/                  Architecture, evaluation and portfolio notes
+docs/                  Architecture, evaluation, hosting and sample results
 .env.example           Local Ollama configuration
 ```
 
-See [architecture](docs/ARCHITECTURE.md), [sample results](docs/SAMPLE_RESULTS.md), and [portfolio summary](docs/PORTFOLIO.md).
+See [architecture](docs/ARCHITECTURE.md), [evaluation](docs/EVALUATION.md), [hosting](docs/HOSTING.md), and [sample results](docs/SAMPLE_RESULTS.md).
 
 ## Current limits and next steps
 

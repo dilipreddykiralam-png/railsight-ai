@@ -2,13 +2,13 @@
 
 ## What has been tested
 
-**109 automated software tests passed** for this repository's publication check. The tests exercise output validation, missing values, review preservation, frame presentation, dataset export and metric behavior. They can run without an active model:
+Automated software checks exercise output validation, missing values, review preservation, frame presentation, dataset export and metric behavior. They can run without downloading or starting a model:
 
 ```bash
 python -m pytest -q
 ```
 
-The [saved local test report](software-test-results.json) records the macOS/Python 3.9.6 publication run. [GitHub Actions](https://github.com/dilipreddykiralam-png/railway-incident-review/actions/workflows/tests.yml) independently installs the declared dependencies and runs the same checks on Linux with Python 3.11 for each push. Use the workflow result for the current commit's status.
+The [GitHub Actions workflow](https://github.com/dilipreddykiralam-png/railsight-ai/actions/workflows/tests.yml) runs the checks on Linux with Python 3.11 for each push and pull request. Its pass/fail status is the current software check; it is not a measure of image-recognition accuracy.
 
 The [saved sample runs](SAMPLE_RESULTS.md) demonstrate Qwen2.5-VL 7B inference and document observed outputs. They are a small demonstration, not an independently labelled benchmark. This project does not claim a measured overall damage-recognition accuracy, a proven time saving or improved safety.
 

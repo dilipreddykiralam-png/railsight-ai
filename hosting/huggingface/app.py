@@ -37,6 +37,7 @@ from railreview.video_presentation import video_presentation
 from railreview.summary import asset_findings, ASSETS
 from railreview.review import review_assets
 from railreview.schema import AssetFinding, LABELS
+from railreview.hf_usage import display_text, read_count, record_completed_analysis
 
 MODEL_ID = 'Qwen/Qwen2.5-VL-7B-Instruct'
 MODEL_REVISION = '1f501a2b058e6918e23d6caa8ab320ef916c8f5b'
@@ -96,15 +97,10 @@ def cleanup_reports():
                 pass
 
 threading.Thread(target=cleanup_reports, daemon=True).start()
-COUNTER_LOCK = threading.Lock()
-# Aggregate runtime counters only: retain no IPs, filenames, media or session IDs.
-completed_count = 0
-session_count = 0
 
 
 def usage_text():
-    with COUNTER_LOCK:
-        return f'**Since this Space started:** {session_count} testing sessions · {completed_count} completed tests. Resets on restart; sessions are not unique people.'
+    return display_text(read_count())
 
 
 def export(record):
@@ -148,8 +144,7 @@ def summary(record):
     return '\n\n'.join(lines)
 
 
-def analyze(path, kind, frames, counted):
-    global completed_count, session_count
+def analyze(path, kind, frames):
     if not path:
         raise gr.Error('Upload an image or video first.')
     limit = 10 if kind == 'Image' else 100
@@ -172,17 +167,12 @@ def analyze(path, kind, frames, counted):
                 state = (frame.get('prediction') or {}).get('incident', 'failed')
                 gallery.append((picture, f"Sample {number} · {frame['timestamp_seconds']:.2f}s · {state}"))
     success = bool(record.get('prediction')) and not record.get('error') and all(f.get('prediction') and not f.get('error') for f in record.get('frames', [record]))
-    if success:
-        with COUNTER_LOCK:
-            completed_count += 1
-            if not counted:
-                session_count += 1
-        counted = True
+    count = record_completed_analysis(record.get('id')) if success else None
     rows = [{**{k: f[k] for k in AssetFinding.model_fields}, 'samples': ','.join(str(s['sample']) for s in f['sources'])} for f in asset_findings(record)] if record.get('prediction') else []
     p = record.get('prediction') or dict(incident='uncertain', asset='unknown', damaged_component='unknown', damage_type='unknown', severity='unknown')
-    return (record, counted, summary(record), gallery, record, export(record),
+    return (record, summary(record), gallery, record, export(record),
             [[row[k] for k in HEADERS] for row in rows],
-            *[p[k] for k in LABELS], usage_text(), '')
+            *[p[k] for k in LABELS], display_text(count), '')
 
 
 def save_review(record, reviewer, rows, notes, *labels):
@@ -203,7 +193,6 @@ with gr.Blocks(title='RailSight AI', delete_cache=(600, 1800)) as demo:
     gr.Markdown('Free shared GPU: queues and daily quotas apply. Open this app through its Hugging Face Space and sign in for your available account quota. Video uses multiple GPU calls and may stop partway when the quota is exhausted. Findings are provisional, and confidence is not accuracy. Uploads are processed on Hugging Face using temporary storage. Download results before leaving. No automatic model training. Do not upload sensitive media.')
     stats = gr.Markdown(usage_text())
     state = gr.State(None, time_to_live=1800)
-    counted = gr.State(False)
     with gr.Row():
         kind = gr.Radio(['Image', 'Video'], value='Image', label='Upload type')
         frames = gr.Slider(2, 4, value=2, step=1, label='Video sample count (more frames use more quota)')
@@ -222,16 +211,16 @@ with gr.Blocks(title='RailSight AI', delete_cache=(600, 1800)) as demo:
     save = gr.Button('Save verification')
     review_status = gr.Markdown()
     download = gr.File(label='Download result JSON')
-    outputs = [state, counted, result_summary, gallery, raw, download, assets, *fields, stats, review_status]
+    outputs = [state, result_summary, gallery, raw, download, assets, *fields, stats, review_status]
     demo.load(usage_text, [], stats, api_name=False)
-    button.click(analyze, [upload, kind, frames, counted], outputs, concurrency_limit=1, concurrency_id='model', api_name=False)
+    button.click(analyze, [upload, kind, frames], outputs, concurrency_limit=1, concurrency_id='model', api_name=False)
     save.click(save_review, [state, reviewer, assets, notes, *fields], [state, raw, download, review_status], api_name=False)
     # Changing input clears stale predictions so they cannot be reviewed as a different upload.
     def clear():
         return None, '', [], None, None, [], ''
     for control in (upload, kind, frames):
         control.change(clear, [], [state, result_summary, gallery, raw, download, assets, review_status], queue=False, api_name=False)
-    gr.Markdown('[Source code and local app](https://github.com/dilipreddykiralam-png/railway-incident-review) · Hosted inference uses Transformers BF16; evaluate separately from local Ollama results.')
+    gr.Markdown('[Source code and local app](https://github.com/dilipreddykiralam-png/railsight-ai) · Hosted inference uses Transformers BF16; evaluate separately from local Ollama results.')
 
 if __name__ == '__main__':
     demo.queue(max_size=8).launch(max_file_size='100mb', show_error=False)
