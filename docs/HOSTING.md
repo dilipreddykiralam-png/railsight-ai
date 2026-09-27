@@ -7,15 +7,15 @@ Checked against official documentation on 25 September 2026. Provider eligibilit
 - **GitHub repository:** full runnable Streamlit application and reproducible examples.
 - **GitHub Pages sample demo:** three licensed images, actual saved Qwen 7B responses, and downloadable review notes. This is a static showcase, not live model inference.
 - **Local full application:** upload images/videos and run Qwen2.5-VL 7B using Ollama without a hosted inference subscription. Your computer supplies the compute.
-- **Public live inference:** not deployed yet. No online inference endpoint or all-time public usage count is claimed.
+- **Public live inference:** [RailSight AI on Hugging Face](https://huggingface.co/spaces/dilipbobby/railsight-ai), running on ZeroGPU. Runtime session/test counts reset on restart; no all-time public count is claimed.
 
 [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages) hosts static websites, not Python/Ollama servers. GitHub Actions runs software checks and publishes the sample website; it is not used as a public inference server.
 
 ## Best free live-demo candidate: Hugging Face ZeroGPU
 
-The current [ZeroGPU documentation](https://huggingface.co/docs/hub/spaces-zerogpu) allows eligible personal free accounts (verified email, older than 30 days, in good standing) to host up to two ZeroGPU Spaces. It supports **Gradio**, so the existing Streamlit/Ollama interface cannot be uploaded unchanged. We would reuse the schema, prompts and review logic in a Gradio interface and run Qwen2.5-VL 7B through Transformers.
+The current [ZeroGPU documentation](https://huggingface.co/docs/hub/spaces-zerogpu) allows eligible personal free accounts (verified email, older than 30 days, in good standing) to host up to two ZeroGPU Spaces. It supports **Gradio**, so the existing Streamlit/Ollama interface cannot be uploaded unchanged. The deployed adapter reuses the schema, prompts and review logic in a Gradio interface and runs Qwen2.5-VL 7B through Transformers.
 
-This is a proposed hosting adaptation, not a tested deployment. It would use different inference software and potentially different quantization from the local Ollama run; its outputs must be evaluated separately. Begin with single-image uploads; video sampling consumes substantially more GPU time. Free users face queues and daily GPU quotas. No unlimited availability is promised.
+The Gradio adaptation is deployed. A real image, report download and human correction were checked on the cloud service; these are deployment checks, not recognition accuracy measurements. It would use different inference software and potentially different quantization from the local Ollama run; its outputs must be evaluated separately. Begin with single-image uploads; video sampling consumes substantially more GPU time. Free users face queues and daily GPU quotas. No unlimited availability is promised.
 
 The general [Spaces overview](https://huggingface.co/docs/hub/spaces-overview) says ordinary new Docker/Gradio compute Spaces require a paid plan, even though CPU Basic has no hourly hardware charge. The ZeroGPU free-account exception is described in its dedicated documentation. Check the account's actual creation options before deploying; do not select paid hardware.
 
@@ -56,3 +56,19 @@ After obtaining an actual deployed HTTPS badge URL, add the following near the R
 ```
 
 [Shields endpoint badges](https://shields.io/badges/endpoint-badge) are cached, so this is an aggregate count refreshed periodically, not an instantaneous live-presence indicator. Until a backend is deployed, the README shows **not connected** rather than a made-up count.
+
+## Maintain the deployed Space
+
+The maintained source is `hosting/huggingface/`. Build its four upload files with:
+
+```bash
+python scripts/build_hf_space.py
+```
+
+In the Space **Files → Contribute → Upload files**, upload `app.py`, `requirements.txt`, `README.md`, and `railreview.zip` from `dist/huggingface/` together, then commit. The archive contains only public Python modules and prompts; the build does not include user uploads or datasets. Keep hardware set to **ZeroGPU Free**. No API token is required for this browser workflow.
+
+The hosted model revision and generation settings are recorded in downloaded reports. `scripts/check_hf_ui.py` checks the Gradio interface and callbacks with fixture inference in an environment containing Gradio 5.49.1 and the app's lightweight dependencies; it does not load a GPU model. Run the real deployment smoke checks after dependency or inference changes.
+
+The hosted app limits video sampling to 2–4 frames to conserve free GPU quota. It retains all original frame responses in the report. Image/video uploads and review downloads use temporary storage with cleanup. Runtime counters retain only aggregate totals; a session flag prevents repeated tests in one session from increasing the session count. No IP or country tracking is implemented. The initial deployment checks also count as completed tests, so totals must not be described as independent users or research cases.
+
+Deployment check on 27 September 2026: a licensed image completed real Qwen inference in 12.123 seconds, and a corrected asset list was saved and downloaded with the original retained. A two-frame synthetic video (one still image repeated, not a research example) produced one valid frame and one ZeroGPU runs-limit error. This verifies partial-failure handling, not unrestricted complete-video availability. Sign in on the Space page for the account quota; free usage remains limited.

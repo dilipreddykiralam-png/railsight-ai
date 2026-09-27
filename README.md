@@ -6,9 +6,9 @@ Analyze railway images and videos. Review damage. Verify with human expertise.
 
 [![Tests](https://github.com/dilipreddykiralam-png/railway-incident-review/actions/workflows/tests.yml/badge.svg)](https://github.com/dilipreddykiralam-png/railway-incident-review/actions/workflows/tests.yml)
 
-**[Explore the free sample demo](https://dilipreddykiralam-png.github.io/railway-incident-review/)** · **Public testing-session count: not connected**
+**[Try RailSight AI — live image/video analysis](https://huggingface.co/spaces/dilipbobby/railsight-ai)** · [Saved-example showcase](https://dilipreddykiralam-png.github.io/railway-incident-review/)
 
-The sample demo shows saved model responses. New uploads require the locally running app; live public inference is not deployed yet. See [free hosting options and counter setup](docs/HOSTING.md).
+The live app runs Qwen2.5-VL 7B on Hugging Face ZeroGPU. Free queues and daily GPU limits apply. **Usage totals are displayed inside the app and reset when the Space restarts; an all-time README counter is not connected.** Hosted inference uses Transformers BF16, so record it separately from local Ollama evaluations. [Hosting and maintenance](docs/HOSTING.md).
 
 A local application that turns railway images and sampled video frames into structured incident and damage findings, with supporting images and human verification.
 
