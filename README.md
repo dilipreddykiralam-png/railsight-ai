@@ -8,7 +8,7 @@ Analyze railway images and videos. Review damage. Verify with human expertise.
 
 **[Try RailSight AI — live image/video analysis](https://huggingface.co/spaces/dilipbobby/railsight-ai)** · [Saved-example showcase](https://dilipreddykiralam-png.github.io/railsight-ai/)
 
-The live app runs Qwen2.5-VL 7B on Hugging Face ZeroGPU. Free queues and daily GPU limits apply. The badge counts successful complete image/video analyses from the hosted app; it does not count page visits or claim a number of unique people. The counter begins after it is enabled on the Space. Hosted inference uses Transformers BF16, so record it separately from local Ollama evaluations. See [hosting and maintenance](docs/HOSTING.md).
+The live app runs Qwen2.5-VL 7B on Hugging Face ZeroGPU. Free queues and daily GPU limits apply. The app shows separate **images analyzed** and **videos analyzed** totals; the badge shows their combined completed-run total. One complete video counts once, not once per frame. Page visits and failed/partial runs are excluded; this is not a count of unique people. Counting starts after the Space's persistent-counter secret is connected. Hosted inference uses Transformers BF16, so record it separately from local Ollama evaluations. See [hosting and maintenance](docs/HOSTING.md).
 
 A local application that turns railway images and sampled video frames into structured incident and damage findings, with supporting images and human verification.
 

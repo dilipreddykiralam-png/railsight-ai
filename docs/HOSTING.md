@@ -8,23 +8,25 @@ The hosted model and software differ from local Ollama runs. Record the deployme
 
 ## Public completed-analysis counter
 
-The README badge and hosted app display a shared count of **successful, complete VLM analyses**. One image counts once; one video counts once if all sampled frames finish. Failed or partial analyses and demo-mode examples are excluded. This is a count of completed runs, not page views, unique people, or active users.
+The hosted app displays **Images analyzed**, **Videos analyzed**, and **Total completed analyses**. The README badge displays the same combined total. One image counts once; one video counts once if all sampled frames finish. Failed or partial analyses, individual video frames, human verification and demo-mode examples are excluded. Reanalyzing an upload creates a new run and counts again if successful. These are completed runs, not unique files, page views, unique people, or active users. Local Ollama runs are separate and do not change the hosted count.
 
-The small public Dataset repository `dilipbobby/railsight-ai-usage` stores only the total, a badge label, and short-lived hashes of random report IDs to avoid duplicate increments. It stores no image/video, model response, filename, reviewer detail, IP address, or account identity. The public JSON is intentionally visible so GitHub can display the badge. The app can read the public total without a token; to increment it, add a fine-grained Hugging Face write token restricted to this one Dataset repository as the Space secret `RAILSIGHT_USAGE_TOKEN`. Never put the token in Git. Set the optional non-sensitive Space variable `RAILSIGHT_USAGE_REPO` only if the counter repo name changes.
+The small public Dataset repository `dilipbobby/railsight-ai-usage` stores aggregate totals, a badge label, and short-lived hashes of random report IDs to avoid duplicate increments. It stores no image/video, model response, filename, reviewer detail, IP address, or account identity. The public JSON is intentionally visible so GitHub can display the badge. The app can read the public totals without a token; to increment them, add a fine-grained Hugging Face write token restricted to this one Dataset repository as the Space secret `RAILSIGHT_USAGE_TOKEN`. Never put the token in Git or a public Space variable. Set the optional non-sensitive Space variable `RAILSIGHT_USAGE_REPO` only if the counter repo name changes. Existing totals migrate automatically; earlier runs without media types are preserved separately rather than assigned invented image/video labels.
 
 To connect or repair the count:
 
-1. Create a **public Dataset** named `railsight-ai-usage` under the `dilipbobby` Hugging Face account. Add `usage.json` with this initial content:
+1. Check the existing [counter Dataset](https://huggingface.co/datasets/dilipbobby/railsight-ai-usage/tree/main). **Do not reset or overwrite existing totals.** Only if creating a fresh Dataset, add `usage.json` with this initial content:
 
    ```json
-   {"schemaVersion":1,"label":"completed analyses","message":"0","color":"blue","cacheSeconds":300,"event_keys":[]}
+   {"schemaVersion":1,"label":"completed analyses","message":"0","color":"blue","cacheSeconds":300,"counts":{"images":0,"videos":0,"legacy":0},"event_keys":[]}
    ```
 
-2. Create a Hugging Face **fine-grained** token that can write only to this Dataset repository. Add it to the Space under **Settings → Variables and secrets** as the secret `RAILSIGHT_USAGE_TOKEN`.
-3. Deploy the current files from `hosting/huggingface/` to the Space. The counter starts from zero when first enabled; it cannot reconstruct earlier uses.
-4. Open the Space, complete a successful image analysis, then check `usage.json` and the README badge. The badge may take several minutes to refresh because it is cached.
+2. Open [Access Tokens](https://huggingface.co/settings/tokens) → **Create new token** → **Fine-grained**. Name it `railsight-usage`. Under permissions for specific repositories, select **dilipbobby/railsight-ai-usage** and enable reading and writing that repository's contents. No account-wide write permission is needed.
+3. Copy the token directly into [Space Settings](https://huggingface.co/spaces/dilipbobby/railsight-ai/settings) → **Variables and secrets → New secret**. Name: `RAILSIGHT_USAGE_TOKEN`. Value: your token. Save it. Do not paste the token into a chat, README, or public file.
+4. Deploy the current files using the instructions below. If the app has not restarted after adding the secret, restart it from Space Settings. Complete a successful image analysis and check that **Images analyzed** increases by one. A complete video run increases **Videos analyzed** by one, regardless of sampled-frame count. Check the saved `usage.json` and README badge; the badge may take several minutes to refresh because it is cached.
 
-If the counter is unavailable, image/video analysis still works; the number may remain unchanged until the write succeeds. Rotate or revoke the token in Hugging Face settings if it is exposed. Hugging Face provides [Space secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables), [fine-grained access tokens](https://huggingface.co/docs/hub/security-tokens), and [public Dataset storage](https://huggingface.co/docs/hub/storage-limits).
+The counter only records runs after write access is configured. Earlier page visits or ZeroGPU calls cannot be converted into completed image/video counts: one video or validation retry can use several GPU calls. Never backfill those analytics as completed analyses.
+
+The app shows **Counter not connected** when the secret is missing, and **Counter update failed** if saving a completed run fails. A failed write is not reported as success; its report has `usage_count_saved: false`. Analysis and downloads remain available. Totals refresh automatically and can be refreshed with the app's button. This small prototype counter does not recover unsaved runs after a server restart. Rotate or revoke the token in Hugging Face settings if it is exposed. Hugging Face provides [Space secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets-and-environment-variables), [fine-grained access tokens](https://huggingface.co/docs/hub/security-tokens), and [public Dataset storage](https://huggingface.co/docs/hub/storage-limits).
 
 ## Updating the Hugging Face app
 
