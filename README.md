@@ -14,6 +14,8 @@ A local application that turns railway images and sampled video frames into stru
 
 Built with **Qwen2.5-VL 7B**, Ollama, Streamlit, Pydantic and OpenCV. The project combines visual assessment, validation, a review interface and reproducible evaluation tools. It uses a pretrained model; no railway-specific training has been performed.
 
+The local app also offers **Gemma 3 12B** through Ollama. Both models use the same image/video analysis and human-review flow. Qwen remains the default; the published sample results are Qwen runs, and Gemma recognition accuracy has not yet been evaluated here. The hosted Hugging Face app runs Qwen only.
+
 **Upload an image or video → analyze visible evidence → inspect findings → confirm or correct → save the reviewed report.**
 
 ## Why this project exists
@@ -82,6 +84,14 @@ ollama serve
 
 If the address is already in use, the service may already be running; do not start a second instance. The default local service uses port `11434`. Model details are documented on the [official Ollama model page](https://ollama.com/library/qwen2.5vl:7b).
 
+To use the optional **Gemma 3 12B** vision model, download it once:
+
+```bash
+ollama pull gemma3:12b
+```
+
+Then select **gemma3:12b** under **Local vision model** in the app sidebar. It supports the same image uploads and sampled-video workflow. [Ollama lists this download as approximately 8.1 GB and requires Ollama 0.6 or later](https://ollama.com/library/gemma3:12b); allow additional memory for inference. This download is separate from Qwen.
+
 ### 2. Install the application
 
 Use Python 3.11 for a new environment. In a terminal:
@@ -145,7 +155,7 @@ The model's answer is a draft. A reviewer can confirm it or change the classific
 
 Confidence is the model's uncalibrated self-assessment. Classification confidence and asset confidence refer to different questions and are labelled separately. Missing confidence is not invented. Visual severity describes the visible finding; it is not an engineering inspection or a repair-cost estimate.
 
-Saving corrections **does not train or update Qwen**. Reviewed examples could support a later dataset after quality and permission checks. Evaluation images should remain separate from future training data.
+Saving corrections **does not train or update either model**. Reviewed examples could support a later dataset after quality and permission checks. Evaluation images should remain separate from future training data.
 
 ## What users should expect
 

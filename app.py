@@ -21,9 +21,9 @@ from railreview.metrics import display_metrics
 st.set_page_config(page_title='RailSight AI', layout='wide')
 st.title('RailSight AI')
 st.subheader('Railway Incident & Damage Intelligence')
-st.caption('Qwen2.5-VL 7B · Evidence-linked findings · Human verification')
+st.caption('Vision-language analysis · Evidence-linked findings · Human verification')
 backend = st.sidebar.selectbox('Analysis backend', ['vlm','demo'])
-chosen_model = st.sidebar.selectbox('Local vision model', ['qwen2.5vl:7b'])
+chosen_model = st.sidebar.selectbox('Local vision model', ['qwen2.5vl:7b', 'gemma3:12b'])
 public_mode = os.getenv('RAILREVIEW_PUBLIC') == '1'
 usage_path = configured_path()
 st.session_state.setdefault('usage_session', uuid.uuid4().hex)
@@ -42,7 +42,7 @@ st.sidebar.caption('Classification confidence and asset confidence are separate 
 if backend == 'demo': st.warning('DEMO: fixed uncertain output. No image understanding is performed.')
 else:
     st.info('Images are sent to the configured VLM endpoint when you click Analyze.')
-    st.caption('Qwen2.5-VL 7B provides provisional findings. Inspect the evidence and confirm or correct each result.')
+    st.caption(f'{chosen_model} provides provisional findings. Inspect the evidence and confirm or correct each result.')
 media = st.radio('Upload type', ['Image', 'Video'], horizontal=True)
 count = 6
 if media == 'Video':
