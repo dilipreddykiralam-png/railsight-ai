@@ -25,12 +25,14 @@ def test_bad_finding_remains_validation_failure():
  data=example();data['findings'][0]['confidence']=float('nan')
  with pytest.raises(ValueError):project_assessment(json.dumps(data))
 
-def test_native_adapter_and_pipeline_keep_raw_contract(monkeypatch):
+@pytest.mark.parametrize('model', ['qwen2.5vl:7b', 'gemma3:12b'])
+def test_native_adapter_and_pipeline_keep_raw_contract(monkeypatch, model):
  import io,threading
  from http.server import HTTPServer,BaseHTTPRequestHandler
  from PIL import Image
  from railreview.backends import VLMBackend
  from railreview.pipeline import run
+ from railreview.prompts import ASSESSMENT_PROMPT, PROMPT_VERSION, OLLAMA_OPTIONS
  captured=[]
  class Handler(BaseHTTPRequestHandler):
   def do_POST(self):
@@ -41,13 +43,31 @@ def test_native_adapter_and_pipeline_keep_raw_contract(monkeypatch):
  try:
   monkeypatch.setenv('VLM_API_STYLE','ollama');monkeypatch.setenv('VLM_BASE_URL',f'http://127.0.0.1:{server.server_port}/v1')
   out=io.BytesIO();Image.new('RGB',(32,32)).save(out,format='PNG')
-  record=run(out.getvalue(),VLMBackend('qwen2.5vl:7b'))
+  record=run(out.getvalue(),VLMBackend(model))
   assert not record['error'] and record['prediction']['incident']=='non_incident'
   assert record['model_assessment']['findings'][0]['component']=='body'
   assert record['response_contract']=='scene_assessment_v4'
+  assert record['prompt_version']==PROMPT_VERSION
+  assert captured[0]['model']==model
+  assert captured[0]['messages'][0]['content']==ASSESSMENT_PROMPT
+  assert captured[0]['options']==OLLAMA_OPTIONS
+  assert record['generation_settings']=={**captured[0]['options'], 'structured_format':True}
+  import hashlib
+  assert record['prompt_sha256']==hashlib.sha256(captured[0]['messages'][0]['content'].encode()).hexdigest()
   assert captured[0]['format']['required']==['scene_context','event','evidence','limitations','findings','event_confidence']
   assert captured[0]['messages'][1]['images']
  finally:server.shutdown();server.server_close();thread.join()
+
+
+def test_expanded_inventory_preserves_each_entry_and_enforces_bound():
+ from railreview.assessment import SceneAssessment, generation_schema
+ data=example()
+ data['findings']=[dict(data['findings'][0], evidence=f'Road vehicle {n}: no damage observed.') for n in range(1,21)]
+ prediction, assessment, _=project_assessment(json.dumps(data))
+ assert len(prediction.findings)==20 and len(assessment['findings'])==20
+ assert generation_schema()['properties']['findings']['maxItems']==20
+ data['findings'].append(dict(data['findings'][0]))
+ with pytest.raises(ValueError):SceneAssessment.model_validate(data)
 
 
 def test_suspected_damage_is_not_confirmed_event_conflict():

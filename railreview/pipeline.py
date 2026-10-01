@@ -8,6 +8,7 @@ from PIL import Image, ImageOps
 from .backends import PROMPT
 from .schema import parse_prediction, review_reasons, Prediction
 from .assessment import SceneAssessment, project_assessment, generation_schema
+from .prompts import LEGACY_PROMPT_VERSION, OLLAMA_OPTIONS
 
 Image.MAX_IMAGE_PIXELS = 25_000_000
 
@@ -30,13 +31,13 @@ def run(data, backend, threshold=0.7):
     image = prepare_image(data)
     record = dict(id=str(uuid.uuid4()), created_at=now(), image_sha256=hashlib.sha256(data).hexdigest(), processed_sha256=hashlib.sha256(image).hexdigest(), backend=backend.name, model=backend.model, schema_sha256=hashlib.sha256(json.dumps(Prediction.model_json_schema(), sort_keys=True).encode()).hexdigest(), prompt_version='railway_v2', prompt_sha256=hashlib.sha256(PROMPT.encode()).hexdigest(), preprocessing='EXIF transpose; RGB; max 1536px; JPEG quality 90', temperature=0, review_threshold=threshold, prediction=None, raw_response=None, error=None, human_verification={'status':'pending'})
     prompt = getattr(backend, 'prompt', PROMPT)
-    record['prompt_version'] = getattr(backend, 'prompt_version', 'railway_v2')
+    record['prompt_version'] = getattr(backend, 'prompt_version', LEGACY_PROMPT_VERSION)
     record['prompt_sha256'] = hashlib.sha256(prompt.encode()).hexdigest()
     record['response_contract'] = getattr(backend, 'response_contract', 'prediction_v2')
     if record['response_contract'] in ['scene_assessment_v3','scene_assessment_v4']:
         output_schema=generation_schema()
         record['schema_sha256'] = hashlib.sha256(json.dumps(output_schema,sort_keys=True).encode()).hexdigest()
-        record['generation_settings'] = {'temperature':0,'num_ctx':8192,'num_predict':2048,'structured_format':True}
+        record['generation_settings'] = {**OLLAMA_OPTIONS, 'structured_format':True}
     record['attempts'] = []
     record['repair_policy'] = 'one_validation_retry_v1'
     def parse(raw):

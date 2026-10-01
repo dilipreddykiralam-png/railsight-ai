@@ -34,6 +34,11 @@ record = result[0]
 assert record['prediction'] and not record['error'], record
 assert record['generation_settings']['structured_format'] is False
 assert record['generation_settings']['engine'] == 'transformers'
+from railreview.prompts import ASSESSMENT_PROMPT, PROMPT_VERSION, HOSTED_MAX_NEW_TOKENS
+import hashlib
+assert record['prompt_version'] == PROMPT_VERSION
+assert record['prompt_sha256'] == hashlib.sha256(ASSESSMENT_PROMPT.encode()).hexdigest()
+assert record['generation_settings']['max_new_tokens'] == HOSTED_MAX_NEW_TOKENS
 assert len(result[2]) == 1
 assert counted_reports == [(record['id'], 'image')]
 assert record['usage_count_saved'] is True

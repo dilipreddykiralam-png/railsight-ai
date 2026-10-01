@@ -17,6 +17,7 @@ from railreview.schema import AssetFinding
 from railreview.video_presentation import video_presentation
 from railreview.ui_results import render_video_samples, render_video_summary
 from railreview.metrics import display_metrics
+from railreview.prompts import PROMPT_VERSION
 
 st.set_page_config(page_title='RailSight AI', layout='wide')
 st.title('RailSight AI')
@@ -51,7 +52,7 @@ if media == 'Video':
 upload = st.file_uploader('Upload one railway ' + media.lower(), type=['jpg','jpeg','png','webp'] if media == 'Image' else ['mp4','mov','avi','mkv','webm'])
 if upload:
     data = upload.getvalue()
-    fingerprint = ('multi-asset-v4', hashlib.sha256(data).hexdigest(), backend, chosen_model, threshold, media, count)
+    fingerprint = (PROMPT_VERSION, hashlib.sha256(data).hexdigest(), backend, chosen_model, threshold, media, count)
     if st.session_state.get('fingerprint') != fingerprint:
         st.session_state.pop('record', None)
         st.session_state.fingerprint = fingerprint

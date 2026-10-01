@@ -85,7 +85,9 @@ python -m railreview.batch \
 
 On PowerShell, create `runs/evaluation` and set the same three variables using `$env:NAME = "value"`. The Python invocation and arguments are the same; enter them on one line or use PowerShell continuation syntax.
 
-Batch inference does not read the reference answers. Each line contains the original model record or an error. Existing output files are not overwritten; use a new filename for each experiment. Keep the model tag, Ollama version, prompt version, schema, environment and hardware recorded with the run. The default `num_ctx` is 8192, `num_predict` is 2048 and temperature is 0; these settings do not guarantee identical outputs across environments.
+Batch inference does not read the reference answers. Each line contains the original model record or an error. Existing output files are not overwritten; use a new filename for each experiment. Keep the model tag, Ollama version, prompt version, schema, environment and hardware recorded with the run. With `railway_visual_assessment_v5`, the default local `num_ctx` is 16384, `num_predict` is 3072 and temperature is 0. The larger context accommodates the detailed user-supplied prompt and one validation retry. Hosted generation allows up to 3072 new tokens. These settings do not guarantee identical outputs across environments and can require more time or memory than the earlier prompt.
+
+The current instructions are preserved verbatim in [railway_visual_assessment_v5.txt](../prompts/railway_visual_assessment_v5.txt), with JSON format mappings in [railreview/prompts.py](../railreview/prompts.py). The saved prompt hash covers the assembled instructions and mapping. Earlier published examples used `asset_first_v4`; they have not been rerun or relabeled as v5 results. Evaluate v5 as a separate experimental configuration, with the model, prompt and generation settings recorded together. A wording change alone is not evidence of improved recognition accuracy.
 
 ## Score classification and damage separately
 

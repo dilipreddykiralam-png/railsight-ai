@@ -38,6 +38,7 @@ from railreview.summary import asset_findings, ASSETS
 from railreview.review import review_assets
 from railreview.schema import AssetFinding, LABELS
 from railreview.hf_usage import display_text, record_completed_analysis
+from railreview.prompts import PROMPT_VERSION, HOSTED_MAX_NEW_TOKENS
 
 MODEL_ID = 'Qwen/Qwen2.5-VL-7B-Instruct'
 MODEL_REVISION = '1f501a2b058e6918e23d6caa8ab320ef916c8f5b'
@@ -60,9 +61,9 @@ def infer(image, instruction):
     images, videos = process_vision_info(messages)
     inputs = processor(text=[text], images=images, videos=videos, padding=True, return_tensors='pt').to('cuda')
     with torch.inference_mode():
-        output = model.generate(**inputs, max_new_tokens=1536, do_sample=False)
+        output = model.generate(**inputs, max_new_tokens=HOSTED_MAX_NEW_TOKENS, do_sample=False)
     generated = output[0, inputs.input_ids.shape[1]:]
-    if len(generated) >= 1536:
+    if len(generated) >= HOSTED_MAX_NEW_TOKENS:
         raise ValueError('Model response reached the output limit; try a clearer image.')
     raw = processor.decode(generated, skip_special_tokens=True, clean_up_tokenization_spaces=False).strip()
     if raw.startswith('```') and raw.endswith('```'):
@@ -74,7 +75,7 @@ class HostedBackend:
     name = 'vlm'
     model = MODEL_ID
     prompt = ASSESSMENT_PROMPT
-    prompt_version = 'asset_first_v4'
+    prompt_version = PROMPT_VERSION
     response_contract = 'scene_assessment_v4'
 
     def analyze(self, image, mime):
@@ -112,7 +113,7 @@ def export(record):
 def mark_metadata(record):
     # Correct the Ollama-specific metadata populated by the shared pipeline.
     for item in record.get('frames', [record]):
-        item['generation_settings'] = {'do_sample': False, 'max_new_tokens': 1536,
+        item['generation_settings'] = {'do_sample': False, 'max_new_tokens': HOSTED_MAX_NEW_TOKENS,
             'structured_format': False, 'schema_in_prompt': True, 'dtype': 'bfloat16',
             'max_image_pixels': 768 * 28 * 28, 'engine': 'transformers',
             'model_revision': MODEL_REVISION}

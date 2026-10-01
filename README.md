@@ -151,6 +151,10 @@ With the default local endpoint, uploaded images are sent to Ollama on your mach
 
 ## Human review and saved reports
 
+The current analysis uses the [user-supplied Railway Incident Visual Assessment prompt](prompts/railway_visual_assessment_v5.txt), version `railway_visual_assessment_v5`. It covers rolling stock, infrastructure and nearby involved assets, with separate incident and asset confidence. The original instructions are preserved; [application mappings](railreview/prompts.py) translate their requested report into the existing JSON schema. Confidence is stored as 0–1 and displayed as a percentage; unsupported asset categories use `other` with the precise name in the description. Asset identifiers and railway/non-railway status are requested within evidence text, not separate new form fields. Up to 20 findings are accepted per image or sampled frame; the model is instructed to disclose an incomplete inventory. Video summaries can group compatible findings and do not track individual vehicles across frames.
+
+Both local Qwen and Gemma, and hosted Qwen, use these assessment instructions. Refresh and analyze again to obtain a new result; previously saved reports and sample results retain their original prompt versions. The longer prompt can take more time and memory. Its recognition accuracy still requires independent evaluation.
+
 The model's answer is a draft. A reviewer can confirm it or change the classification and asset findings, including adding missing damage findings. The app saves the original output and the reviewed result separately in `runs/`; that directory is excluded from Git.
 
 Confidence is the model's uncalibrated self-assessment. Classification confidence and asset confidence refer to different questions and are labelled separately. Missing confidence is not invented. Visual severity describes the visible finding; it is not an engineering inspection or a repair-cost estimate.
